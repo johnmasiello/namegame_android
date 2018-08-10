@@ -10,6 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/name_game_title_text_margin"
+        android:text="@string/app_name"
         android:textSize="22sp"
         android:textColor="@color/darkGray"
         android:gravity="center_horizontal"/>
@@ -21,39 +22,35 @@
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
-        <ImageView
+        <include
+            layout="@layout/person_layout"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:contentDescription="@string/cdFace"/>
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
 
-        <ImageView
+        <include
+            layout="@layout/person_layout"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/cdFace"/>
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
 
-        <ImageView
+        <include
+            layout="@layout/person_layout"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/cdFace"/>
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
 
-        <ImageView
+        <include
+            layout="@layout/person_layout"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/cdFace"/>
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
 
-        <ImageView
+        <include
+            layout="@layout/person_layout"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/cdFace"/>
+            android:layout_height="match_parent"
+            android:layout_weight="1" />
 
     </LinearLayout>
 

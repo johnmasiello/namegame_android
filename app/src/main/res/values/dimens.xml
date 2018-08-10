@@ -1,3 +1,4 @@
 <resources>
     <dimen name="name_game_title_text_margin">16dp</dimen>
+    <dimen name="thumbSize">100dp</dimen>
 </resources>

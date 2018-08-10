@@ -68,7 +68,7 @@ public class ProfilesRepositoryTest {
         ProfilesRepository repo = new ProfilesRepository(api);
         ProfilesRepository.Listener listener = mock(ProfilesRepository.Listener.class);
         repo.register(listener);
-        verify(listener, times(1)).onLoadFinished(any(Profiles.class));
+        verify(listener, times(1)).onLoadSuccess(any(Profiles.class));
     }
 
     @Test
@@ -78,7 +78,7 @@ public class ProfilesRepositoryTest {
         ProfilesRepository repo = new ProfilesRepository(api);
         ProfilesRepository.Listener listener = mock(ProfilesRepository.Listener.class);
         repo.register(listener);
-        verify(listener, times(0)).onLoadFinished(any(Profiles.class));
+        verify(listener, times(0)).onLoadSuccess(any(Profiles.class));
     }
 
     @Test

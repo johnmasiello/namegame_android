@@ -3,7 +3,7 @@ package com.willowtreeapps.namegame.network.api.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-// Simple POJO to help satisfy the spec for the resonse body
+// Simple POJO to help satisfy the spec for the response body
 public class SocialLinks implements Parcelable {
     private final String mType;
     private final String mCallToAction;

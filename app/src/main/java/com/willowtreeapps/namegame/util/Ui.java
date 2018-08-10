@@ -33,6 +33,12 @@ public final class Ui {
         return px / ((float)metrics.densityDpi / DisplayMetrics.DENSITY_DEFAULT);
     }
 
+    // Useful for when a library does not automatically resolve relative paths
+    public static String urlPathWithScheme(String path) {
+        return path == null ? null :
+                "http:" + path;
+    }
+
     private Ui() {
         throw new AssertionError("No instances.");
     }

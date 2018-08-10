@@ -5,6 +5,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.google.gson.Gson;
+import com.willowtreeapps.namegame.network.api.ProfilesRepository;
 
 import java.util.Random;
 
@@ -40,7 +41,7 @@ class ApplicationModule {
 
     @Provides @NonNull @Singleton
     public Random provideRandom() {
-        return new Random(0); // TODO REVERT back to using current time to seed the random generator System.currentTimeMillis());
+        return new Random(System.currentTimeMillis());
     }
 
     @Provides @NonNull @Singleton
@@ -48,4 +49,9 @@ class ApplicationModule {
         return new ListRandomizer(random);
     }
 
+    @Provides @NonNull @Singleton
+    public GameLogic provideGameLogic(@NonNull ListRandomizer listRandomizer,
+                                      @NonNull ProfilesRepository profilesRepository) {
+        return new GameLogic(listRandomizer, profilesRepository);
+    }
 }

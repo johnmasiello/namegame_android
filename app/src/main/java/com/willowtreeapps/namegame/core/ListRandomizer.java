@@ -32,4 +32,6 @@ public class ListRandomizer {
         }
         return picks;
     }
+
+    public int nextInt(int size) { return random.nextInt(size); }
 }
