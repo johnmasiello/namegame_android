@@ -1,12 +1,17 @@
 package com.willowtreeapps.namegame.network.api.model;
 
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Config;
+import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Person implements Parcelable {
-
+    // Pojo
     private final String id;
     private final String type;
     private final String slug;
@@ -14,7 +19,7 @@ public class Person implements Parcelable {
     private final String firstName;
     private final String lastName;
     private final Headshot headshot;
-    private final List<String> socialLinks;
+    private final List<SocialLinks> socialLinks;
 
     public Person(String id,
                   String type,
@@ -23,7 +28,7 @@ public class Person implements Parcelable {
                   String firstName,
                   String lastName,
                   Headshot headshot,
-                  List<String> socialLinks) {
+                  List<SocialLinks> socialLinks) {
         this.id = id;
         this.type = type;
         this.slug = slug;
@@ -42,7 +47,18 @@ public class Person implements Parcelable {
         this.firstName = in.readString();
         this.lastName = in.readString();
         this.headshot = in.readParcelable(Headshot.class.getClassLoader());
-        this.socialLinks = in.createStringArrayList();
+
+        this.socialLinks = new ArrayList<>();
+        Parcelable[] socialLinks = in.readParcelableArray(SocialLinks.class.getClassLoader());
+        if (socialLinks != null) {
+            for (Parcelable x : socialLinks) {
+                try {
+                    this.socialLinks.add((SocialLinks)x);
+                } catch (ClassCastException ignore) {
+                    Log.d("JSON", "Unable to read social links for object with id="+this.id);
+                }
+            }
+        }
     }
 
     public String getId() {
@@ -73,7 +89,7 @@ public class Person implements Parcelable {
         return headshot;
     }
 
-    public List<String> getSocialLinks() {
+    public List<SocialLinks> getSocialLinks() {
         return socialLinks;
     }
 
@@ -86,7 +102,7 @@ public class Person implements Parcelable {
         dest.writeString(this.firstName);
         dest.writeString(this.lastName);
         dest.writeParcelable(this.headshot, flags);
-        dest.writeStringList(this.socialLinks);
+        dest.writeParcelableArray(this.socialLinks.toArray(new Parcelable[socialLinks.size()]), flags);
     }
 
     public static final Creator<Person> CREATOR = new Creator<Person>() {

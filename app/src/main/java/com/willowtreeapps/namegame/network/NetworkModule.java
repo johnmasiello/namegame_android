@@ -55,7 +55,7 @@ public class NetworkModule {
 
     @Provides @NonNull @Singleton
     public Cache provideNetworkCache(@NonNull @Named(NETWORK_CACHE) File cacheDir) {
-        int cacheSize = 20 * 1024 * 1024; // 20 MiB
+        int cacheSize = 50 * 1024 * 1024; // 50 MiB
         return new Cache(cacheDir, cacheSize);
     }
 

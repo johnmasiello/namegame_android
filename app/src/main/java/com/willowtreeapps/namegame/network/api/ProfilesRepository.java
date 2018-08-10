@@ -2,7 +2,9 @@ package com.willowtreeapps.namegame.network.api;
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
+import com.willowtreeapps.namegame.network.api.model.Person;
 import com.willowtreeapps.namegame.network.api.model.Profiles;
 
 import java.util.ArrayList;
@@ -20,7 +22,7 @@ public class ProfilesRepository {
     @NonNull
     private List<Listener> listeners = new ArrayList<>(1);
     @Nullable
-    private Profiles profiles;
+    private List<Person> profiles;
 
     public ProfilesRepository(@NonNull NameGameApi api, Listener... listeners) {
         this.api = api;
@@ -31,20 +33,41 @@ public class ProfilesRepository {
     }
 
     private void load() {
-        this.api.getProfiles().enqueue(new Callback<Profiles>() {
+        // Retrofit2
+        this.api.getProfiles().enqueue(new Callback<List<Person>>() {
             @Override
-            public void onResponse(Call<Profiles> call, Response<Profiles> response) {
+            public void onResponse(Call<List<Person>> call, Response<List<Person>> response) {
                 profiles = response.body();
                 for (Listener listener : listeners) {
                     listener.onLoadFinished(profiles);
                 }
+                Log.d("Repository", "Success fetching profiles");
             }
 
             @Override
-            public void onFailure(Call<Profiles> call, Throwable t) {
+            public void onFailure(Call<List<Person>> call, Throwable t) {
                 for (Listener listener : listeners) {
                     listener.onError(t);
                 }
+
+                Log.d("Repository", "Failure fetching profiles");
+                Log.d("Repository", "Reason: "+t.getMessage());
+                Log.d("Repository", "The original url was..." + call.request().url().toString());
+
+                /*
+                Failure fetching profiles
+                Reason: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was BEGIN_ARRAY at line 1 column 2 path $
+                The original url was...https://willowtreeapps.com/api/v1.0/profiles
+                 */
+
+                // Using Api as Call<List<Person>> getProfiles();
+                /*
+                 * com.willowtreeapps.namegame D/Repository: Failure fetching profiles
+                 Reason: java.lang.IllegalStateException: Expected a string but was BEGIN_OBJECT at line 1 column 2133 path $[4].socialLinks[0]
+                 The original url was...https://willowtreeapps.com/api/v1.0/profiles
+                 */
+
+                // -> Solution need to update Social Links To match the spec: [{String, String, String}]
             }
         });
     }
@@ -62,7 +85,7 @@ public class ProfilesRepository {
     }
 
     public interface Listener {
-        void onLoadFinished(@NonNull Profiles people);
+        void onLoadFinished(@NonNull List<Person> people);
         void onError(@NonNull Throwable error);
     }
 

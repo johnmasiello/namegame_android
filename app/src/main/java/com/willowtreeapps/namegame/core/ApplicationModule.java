@@ -40,7 +40,7 @@ class ApplicationModule {
 
     @Provides @NonNull @Singleton
     public Random provideRandom() {
-        return new Random(System.currentTimeMillis());
+        return new Random(0); // TODO REVERT back to using current time to seed the random generator System.currentTimeMillis());
     }
 
     @Provides @NonNull @Singleton
