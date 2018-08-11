@@ -4,4 +4,5 @@
     <dimen name="item_width">128dp</dimen>
     <dimen name="name_margin">8dp</dimen>
     <dimen name="min_text_size">12sp</dimen>
+    <dimen name="progressBarSize">150dp</dimen>
 </resources>

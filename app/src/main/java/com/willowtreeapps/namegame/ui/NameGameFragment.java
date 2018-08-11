@@ -13,9 +13,11 @@ import android.view.ViewGroup;
 import android.view.animation.Interpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 import com.willowtreeapps.namegame.R;
 import com.willowtreeapps.namegame.core.GameLogic;
@@ -42,9 +44,8 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
     private Group container;
     private List<ImageView> faces = new ArrayList<>(6);
     private List<TextView> mNames = new ArrayList<>(6);
-
-    // TODO remove toast as progressbar
-    private Toast progressBar;
+    private ProgressBar mProgressBar;
+    private int mNumberOfImagesFinishedLoading;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -62,6 +63,7 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         prompt = view.findViewById(R.id.prompt);
+        mProgressBar = view.findViewById(R.id.myProgressBar);
         container = view.findViewById(R.id.face_container);
         view.findViewById(R.id.nextTurn).setOnClickListener(onPersonSelected);
 
@@ -85,9 +87,9 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
         gameLogic.register(this);
 
         if (!gameLogic.isReady()) {
-            // TODO show a progress bar, so the user knows the app is alive
-            progressBar = Toast.makeText(getContext(), "In Progress", Toast.LENGTH_LONG);
-            progressBar.show();
+            // Show a progress bar, so the user knows the app is alive
+            showProgressBar(true);
+            showPrompt(false);
         }
     }
 
@@ -106,15 +108,30 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
         int n = people.size();
         String url;
 
+        // Used to sync the Images when loading;
+        mNumberOfImagesFinishedLoading = 0;
+
+        // Hide the images until they have all finished loading, and show a progress bar
+        showProgressBar(true);
+
         for (int i = 0; i < n; i++) {
             ImageView face = faces.get(i);
 
             url = Ui.urlPathWithScheme(people.get(i).getHeadshot().getUrl());
+            if (url == null) {
+                // The callback gets called when url != null
+                // We need to offset the number of times it does not get called,
+                // so we know when all of the images are finished being loaded
+                mNumberOfImagesFinishedLoading++;
+            }
+
             picasso.load(url)
                     .placeholder(R.drawable.ic_face_white_48dp)
                     .resize(imageSize, imageSize)
+                    .centerCrop()
                     .transform(new CircleBorderTransform())
-                    .into(face);
+                    .noFade() // We want our own animation, not animation based on load order
+                    .into(face, mPicassoCallback);
         }
     }
 
@@ -154,6 +171,34 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
     }
 
     /**
+     * <p>Post: show == true -> container.getVisibility() == View.GONE</p>
+     * @param show true -> show; false -> hide
+     */
+    private void showProgressBar(boolean show) {
+        mProgressBar.setVisibility(show ? View.VISIBLE : View.GONE);
+        if (show) container.setVisibility(View.GONE);
+    }
+
+    private void showPrompt(boolean show) {
+        prompt.setVisibility(show ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    /**
+     * <p>Synchronizes the loading of images, by displaying the container once all of them have
+     * finished loading</p>
+     * <p>Post: automatically hides the progress bar, via showProgressBar(false)</p>
+     */
+    private synchronized void onFinishedLoadingImage() {
+        if (++mNumberOfImagesFinishedLoading == gameLogic.getPeopleLogic().numberOfThumbs()) {
+            container.setVisibility(View.VISIBLE);
+            showPrompt(true);
+            showProgressBar(false);
+            // TODO show/animate everything in the UI right here
+        }
+        Log.d("PicassoCallback", "finished loading image "+mNumberOfImagesFinishedLoading);
+    }
+
+    /**
      * A method to animate the faces into view
      */
     private void animateFacesIn() {
@@ -173,22 +218,15 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
             hideNames(mNames);
         }
         updatePrompt(peopleLogic.currentNames().get(0));
-
-
-
-        // TODO remove progress bar
-        if (progressBar != null) progressBar.cancel();
     }
 
     @Override
     public void onGameLogicLoadFail(@NonNull Throwable error) {
-        Toast.makeText(getContext(), error.getMessage(), Toast.LENGTH_SHORT).show();
-
-        // TODO remove progress bar
-        if (progressBar != null) progressBar.cancel();
+        Toast.makeText(getContext(), "Network unavailable", Toast.LENGTH_SHORT).show();
+        showProgressBar(false);
     }
 
-    private View.OnClickListener onPersonSelected = new View.OnClickListener() {
+    final private View.OnClickListener onPersonSelected = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
             int index;
@@ -216,6 +254,7 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
                 case R.id.nextTurn:
                     if (gameLogic.isReady()) {
                         // Update the state of the game, delegated by the 'p' in "MVP"
+                        showPrompt(false);
                         peopleLogic.next();
 
                         // Update the Ui, the 'V' in "MVP"
@@ -236,6 +275,18 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
             // We use currentThumbs as 2nd parameter, because it contains all of person objects
             // backing the thumbs, which is what we want
             revealNames(mNames, peopleLogic);
+        }
+    };
+
+    final private Callback mPicassoCallback = new Callback() {
+        @Override
+        public void onSuccess() {
+            onFinishedLoadingImage();
+        }
+
+        @Override
+        public void onError() {
+            onFinishedLoadingImage();
         }
     };
 }
