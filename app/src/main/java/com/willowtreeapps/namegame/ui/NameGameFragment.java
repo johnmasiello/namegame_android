@@ -192,6 +192,7 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
         if (++mNumberOfImagesFinishedLoading == gameLogic.getPeopleLogic().numberOfThumbs()) {
             container.setVisibility(View.VISIBLE);
             showPrompt(true);
+            animateFacesIn();
             showProgressBar(false);
             // TODO show/animate everything in the UI right here
         }
@@ -202,9 +203,16 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
      * A method to animate the faces into view
      */
     private void animateFacesIn() {
+        // Set the initial state as hidden
+        prompt.setAlpha(0);
         prompt.animate().alpha(1).start();
+
+
         for (int i = 0; i < faces.size(); i++) {
             ImageView face = faces.get(i);
+            // Set the initial state as hidden
+            face.setScaleX(0);
+            face.setScaleY(0);
             face.animate().scaleX(1).scaleY(1).setStartDelay(800 + 120 * i).setInterpolator(OVERSHOOT).start();
         }
     }
@@ -254,10 +262,10 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
                 case R.id.nextTurn:
                     if (gameLogic.isReady()) {
                         // Update the state of the game, delegated by the 'p' in "MVP"
-                        showPrompt(false);
                         peopleLogic.next();
 
                         // Update the Ui, the 'V' in "MVP"
+                        showPrompt(false);
                         setImages(faces, peopleLogic.currentThumbs());
                         hideNames(mNames);
                         updatePrompt(peopleLogic.currentNames().get(0));
