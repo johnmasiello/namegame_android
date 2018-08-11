@@ -3,6 +3,8 @@ package com.willowtreeapps.namegame.ui;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
+import android.support.constraint.Group;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -37,8 +39,9 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
     Picasso picasso;
 
     private TextView title;
-    private ViewGroup container;
-    private List<ImageView> faces = new ArrayList<>(5);
+    private Group container;
+    private List<ImageView> faces = new ArrayList<>(6);
+    private List<TextView> names = new ArrayList<>(6);
 
     // TODO remove toast as progressbar
     private Toast progressBar;
@@ -59,14 +62,20 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         title = (TextView) view.findViewById(R.id.title);
-        container = (ViewGroup) view.findViewById(R.id.face_container);
+        container = view.findViewById(R.id.face_container);
 
         //Hide the views until data loads
 //        title.setAlpha(0);
 
-        int n = container.getChildCount();
-        for (int i = 0; i < n; i++) {
-            ImageView face = (ImageView) container.getChildAt(i).findViewById(R.id.portrait);
+        int[] ids = container.getReferencedIds();
+        int n = ids.length;
+        View person;
+
+        for (int id: ids) {
+            // Find the layout that will depict the person model
+            person = view.findViewById(id);
+
+            ImageView face = person.findViewById(R.id.portrait);
             faces.add(face);
 
             //Hide the views until data loads
