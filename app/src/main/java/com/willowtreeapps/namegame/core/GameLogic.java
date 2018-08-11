@@ -1,6 +1,7 @@
 package com.willowtreeapps.namegame.core;
 
 import android.support.annotation.NonNull;
+import android.util.Log;
 
 import com.willowtreeapps.namegame.network.api.ProfilesRepository;
 import com.willowtreeapps.namegame.network.api.model.Person;
@@ -20,6 +21,7 @@ public class GameLogic implements ProfilesRepository.Listener {
      * Equivalent to data in ProfileRepository is live
      */
     private boolean mReadyToLoadGame;
+    private boolean mFullyRevealItems;
     private int mMode;
     private PeopleLogic peopleLogic;
     private ArrayList<Listener> listeners = new ArrayList<>(1);
@@ -36,8 +38,8 @@ public class GameLogic implements ProfilesRepository.Listener {
                      ProfilesRepository profilesRepository) {
         this.mListRandomizer = listRandomizer;
         this.mProfilesRepository = profilesRepository;
-        setMode(Mode.STANDARD);
         mReadyToLoadGame = false;
+        newGame(Mode.STANDARD);
         mProfilesRepository.register(this);
     }
 
@@ -48,6 +50,7 @@ public class GameLogic implements ProfilesRepository.Listener {
      */
     public boolean newGame(int mode) {
         setMode(mode);
+        mFullyRevealItems = false;
 
         if (mReadyToLoadGame) {
             peopleLogic.next();
@@ -80,6 +83,8 @@ public class GameLogic implements ProfilesRepository.Listener {
     public PeopleLogic getPeopleLogic() {
         return peopleLogic;
     }
+
+    public boolean fullyRevealItems() { return mFullyRevealItems; }
 
     /**
      * @return Whether the list of people has finished loading from the Network Module.
@@ -122,6 +127,7 @@ public class GameLogic implements ProfilesRepository.Listener {
     public void onLoadSuccess(@NonNull List<Person> people) {
         mReadyToLoadGame = true;
         peopleLogic.next();
+        mFullyRevealItems = false;
 
         for (Listener listener : listeners)
             listener.onGameLogicLoadSuccess(peopleLogic);
@@ -142,7 +148,8 @@ public class GameLogic implements ProfilesRepository.Listener {
 
         private List<Person> mThumbs;
         private List<Person> mNames = new ArrayList<>(NUMBER_OF_NAMES);
-
+        private int correctIndex;
+        private boolean correct;
         {
             mNames.add(null);
         }
@@ -150,7 +157,33 @@ public class GameLogic implements ProfilesRepository.Listener {
         @Override
         public void next() {
             mThumbs = mListRandomizer.pickN(mProfilesRepository.getProfiles(), NUMBER_OF_THUMBS);
-            mNames.set(0, mThumbs.get(mListRandomizer.nextInt(NUMBER_OF_NAMES)));
+            mNames.set(0, mThumbs.get(correctIndex = mListRandomizer.nextInt(NUMBER_OF_NAMES)));
+            mFullyRevealItems = false;
+        }
+
+        @Override
+        public void onItemSelected(int index) {
+            String id = mThumbs.get(index).getId();
+            if (id == null) {
+                Log.d("GameLogic", "id of person is not present on click");
+                return;
+            }
+            correct = id.equals(mNames.get(0).getId());
+            Log.d("GameLogic", correct ? "Correct" : "Incorrect");
+
+            // TODO update game state based on selection being correct
+
+            mFullyRevealItems = true;
+        }
+
+        @Override
+        public int correctItemIndex() {
+            return correctIndex;
+        }
+
+        @Override
+        public boolean isCorrect() {
+            return correct;
         }
 
         @Override
@@ -180,6 +213,8 @@ public class GameLogic implements ProfilesRepository.Listener {
 
         private List<Person> mThumbs = new ArrayList<>(NUMBER_OF_THUMBS);
         private List<Person> mNames;
+        private int correctIndex;
+        private boolean correct;
 
         {
             mThumbs.add(null);
@@ -188,7 +223,22 @@ public class GameLogic implements ProfilesRepository.Listener {
         @Override
         public void next() {
             mNames = mListRandomizer.pickN(mProfilesRepository.getProfiles(), NUMBER_OF_NAMES);
-            mThumbs.set(0, mThumbs.get(mListRandomizer.nextInt(NUMBER_OF_THUMBS)));
+            mThumbs.set(0, mThumbs.get(correctIndex = mListRandomizer.nextInt(NUMBER_OF_THUMBS)));
+        }
+
+        @Override
+        public void onItemSelected(int index) {
+            return;
+        }
+
+        @Override
+        public int correctItemIndex() {
+            return correctIndex;
+        }
+
+        @Override
+        public boolean isCorrect() {
+            return correct;
         }
 
         @Override
@@ -220,6 +270,15 @@ public class GameLogic implements ProfilesRepository.Listener {
          * Updates State to "next", may consist of new names, thumbs
          */
         void next();
+
+        /**
+         * Item could be a person or a name
+         * @param index the index of the item relative to the sublist of names or thumbs
+         *
+         */
+        void onItemSelected(int index);
+        int correctItemIndex();
+        boolean isCorrect();
 
         List<Person> currentThumbs();
         List<Person> currentNames();

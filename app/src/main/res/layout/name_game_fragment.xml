@@ -5,15 +5,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/title"
-        android:layout_width="wrap_content"
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/prompt"
+        android:layout_width="180dp"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/name_game_title_text_margin"
         android:gravity="center"
-        android:text="@string/app_name"
         android:textColor="@color/darkGray"
         android:textSize="22sp"
+        app:autoSizeTextType="uniform"
+        app:autoSizeMinTextSize="@dimen/min_text_size"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -33,7 +34,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title" />
+        app:layout_constraintTop_toBottomOf="@+id/prompt" />
 
     <include
         android:id="@+id/two"
@@ -49,7 +50,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/one"
-        app:layout_constraintTop_toBottomOf="@+id/title" />
+        app:layout_constraintTop_toBottomOf="@+id/prompt" />
 
     <include
         android:id="@+id/three"
@@ -122,5 +123,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:constraint_referenced_ids="one,two,three,four,five,six" />
+
+    <ImageButton
+        android:id="@+id/nextTurn"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="25dp"
+        android:layout_marginRight="25dp"
+        android:layout_marginTop="@dimen/name_game_title_text_margin"
+        android:contentDescription="Next"
+        android:src="@android:drawable/ic_media_play"
+        android:background="@color/colorPrimary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </android.support.constraint.ConstraintLayout>

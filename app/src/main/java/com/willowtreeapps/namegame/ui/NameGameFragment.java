@@ -1,9 +1,9 @@
 package com.willowtreeapps.namegame.ui;
 
+import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.constraint.ConstraintLayout;
 import android.support.constraint.Group;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -38,10 +38,10 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
     @Inject
     Picasso picasso;
 
-    private TextView title;
+    private TextView prompt;
     private Group container;
     private List<ImageView> faces = new ArrayList<>(6);
-    private List<TextView> names = new ArrayList<>(6);
+    private List<TextView> mNames = new ArrayList<>(6);
 
     // TODO remove toast as progressbar
     private Toast progressBar;
@@ -61,26 +61,25 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
 
     @Override
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        title = (TextView) view.findViewById(R.id.title);
+        prompt = view.findViewById(R.id.prompt);
         container = view.findViewById(R.id.face_container);
-
-        //Hide the views until data loads
-//        title.setAlpha(0);
+        view.findViewById(R.id.nextTurn).setOnClickListener(onPersonSelected);
 
         int[] ids = container.getReferencedIds();
-        int n = ids.length;
         View person;
 
         for (int id: ids) {
             // Find the layout that will depict the person model
             person = view.findViewById(id);
+            person.setOnClickListener(onPersonSelected);
 
             ImageView face = person.findViewById(R.id.portrait);
             faces.add(face);
 
-            //Hide the views until data loads
-//            face.setScaleX(0);
-//            face.setScaleY(0);
+            TextView name = person.findViewById(R.id.firstName);
+            // Hide names
+            name.setVisibility(View.INVISIBLE);
+            mNames.add(name);
         }
 
         gameLogic.register(this);
@@ -100,10 +99,11 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
 
     /**
      * A method for setting the images from people into the imageviews
+     * <p>Pre: faces.size() == people.size()</p>
      */
     private void setImages(List<ImageView> faces, List<Person> people) {
         int imageSize = getContext().getResources().getDimensionPixelSize(R.dimen.thumbSize);
-        int n = faces.size() < people.size() ? faces.size() : people.size();
+        int n = people.size();
         String url;
 
         for (int i = 0; i < n; i++) {
@@ -118,35 +118,62 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
         }
     }
 
+    private void updatePrompt(Person namedPerson) {
+        prompt.setText(String.format(getString(R.string.question),
+                namedPerson.getFirstName(),
+                namedPerson.getLastName()
+        ));
+    }
+
+
+    private void revealNames(List<TextView> names, GameLogic.PeopleLogic peopleLogic) {
+        // Get the people backed by the thumbs
+        List<Person> people = peopleLogic.currentThumbs();
+        int n = people.size();
+
+        // We make the Ui, pretty
+        // by making the correct answer stand out
+        TextView t;
+        Resources res = getContext().getResources();
+        int colorNormal = res.getColor(R.color.darkGray);
+        int colorHighlight = res.getColor(peopleLogic.isCorrect() ? R.color.alphaGreen :
+                R.color.alphaRed);
+        int correctItemIndex = peopleLogic.correctItemIndex();
+
+        for (int i = 0; i < n; i++) {
+            t = names.get(i);
+            t.setText(people.get(i).getFirstName());
+            t.setTextColor(i == correctItemIndex ? colorHighlight : colorNormal);
+            t.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void hideNames(List<TextView> names) {
+        for (TextView t : names)
+            t.setVisibility(View.INVISIBLE);
+    }
+
     /**
      * A method to animate the faces into view
      */
     private void animateFacesIn() {
-        title.animate().alpha(1).start();
+        prompt.animate().alpha(1).start();
         for (int i = 0; i < faces.size(); i++) {
             ImageView face = faces.get(i);
             face.animate().scaleX(1).scaleY(1).setStartDelay(800 + 120 * i).setInterpolator(OVERSHOOT).start();
         }
     }
 
-    /**
-     * A method to handle when a person is selected
-     *
-     * @param view   The view that was selected
-     * @param person The person that was selected
-     */
-    private void onPersonSelected(@NonNull View view, @NonNull Person person) {
-        //TODO evaluate whether it was the right person and make an action based on that
-    }
-
     @Override
     public void onGameLogicLoadSuccess(@NonNull GameLogic.PeopleLogic peopleLogic) {
         setImages(faces, peopleLogic.currentThumbs());
-        Person namedPerson = peopleLogic.currentNames().get(0);
-        title.setText(String.format(getString(R.string.question),
-                namedPerson.getFirstName(),
-                namedPerson.getLastName()
-                ));
+        if (gameLogic.fullyRevealItems()) {
+            revealNames(mNames, peopleLogic);
+        } else {
+            hideNames(mNames);
+        }
+        updatePrompt(peopleLogic.currentNames().get(0));
+
 
 
         // TODO remove progress bar
@@ -160,4 +187,55 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
         // TODO remove progress bar
         if (progressBar != null) progressBar.cancel();
     }
+
+    private View.OnClickListener onPersonSelected = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            int index;
+            GameLogic.PeopleLogic peopleLogic = gameLogic.getPeopleLogic();
+
+            switch (v.getId()) {
+                case R.id.one:
+                    index = 0;
+                    break;
+                case R.id.two:
+                    index = 1;
+                    break;
+                case R.id.three:
+                    index = 2;
+                    break;
+                case R.id.four:
+                    index = 3;
+                    break;
+                case R.id.five:
+                    index = 4;
+                    break;
+                case R.id.six:
+                    index = 5;
+                    break;
+                case R.id.nextTurn:
+                    if (gameLogic.isReady()) {
+                        // Update the state of the game, delegated by the 'p' in "MVP"
+                        peopleLogic.next();
+
+                        // Update the Ui, the 'V' in "MVP"
+                        setImages(faces, peopleLogic.currentThumbs());
+                        hideNames(mNames);
+                        updatePrompt(peopleLogic.currentNames().get(0));
+                    }
+                    return;
+
+                default:
+                    return;
+            }
+            if (gameLogic.fullyRevealItems()) return;
+
+            peopleLogic.onItemSelected(index);
+
+            // Update the Ui
+            // We use currentThumbs as 2nd parameter, because it contains all of person objects
+            // backing the thumbs, which is what we want
+            revealNames(mNames, peopleLogic);
+        }
+    };
 }

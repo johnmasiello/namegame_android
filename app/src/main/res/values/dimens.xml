@@ -1,5 +1,7 @@
 <resources>
     <dimen name="name_game_title_text_margin">16dp</dimen>
     <dimen name="thumbSize">128dp</dimen>
-    <dimen name="item_width">156dp</dimen>
+    <dimen name="item_width">128dp</dimen>
+    <dimen name="name_margin">8dp</dimen>
+    <dimen name="min_text_size">12sp</dimen>
 </resources>
