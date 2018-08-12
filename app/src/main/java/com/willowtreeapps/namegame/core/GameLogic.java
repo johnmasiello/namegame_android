@@ -198,7 +198,8 @@ public class GameLogic implements ProfilesRepository.Listener {
 
         @Override
         public void onItemSelected(int index) {
-            correct = TextUtils.equals(mThumbs.get(index).getId(), mNames.get(0).getId());
+            correct = index < mNumberOfPeople &&
+                    TextUtils.equals(mThumbs.get(index).getId(), mNames.get(0).getId());
             mFullyRevealItems = true;
         }
 

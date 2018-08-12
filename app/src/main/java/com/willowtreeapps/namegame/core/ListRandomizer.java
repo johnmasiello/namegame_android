@@ -48,7 +48,7 @@ public class ListRandomizer {
                         break SELECT_ITEM;
                     }
                 }
-                for (int j = index + 1; j > pickFrom.size(); j++) {
+                for (int j = index + 1; j < pickFrom.size(); j++) {
                     if (filter.accept(pickFrom.get(j))) {
                         picks.add(pickFrom.remove(j));
                         break SELECT_ITEM;

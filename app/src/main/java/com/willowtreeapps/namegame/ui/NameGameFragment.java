@@ -168,6 +168,9 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
                     .noFade() // We want our own animation, not animation based on load order
                     .into(face, mPicassoCallback);
         }
+
+        for (int i = n; i < faces.size(); i++)
+            faces.get(i).setImageResource(R.drawable.ic_face_white_48dp);
     }
 
     private void updatePrompt(Person namedPerson) {
@@ -198,6 +201,8 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
             t.setTextColor(i == correctItemIndex ? colorHighlight : colorNormal);
             t.setVisibility(View.VISIBLE);
         }
+        for (int i = n; i < names.size(); i++)
+            names.get(i).setText("");
         animateNamesIn(withDelay);
     }
 
