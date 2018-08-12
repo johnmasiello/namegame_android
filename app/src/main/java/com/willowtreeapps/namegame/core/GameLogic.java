@@ -2,6 +2,7 @@ package com.willowtreeapps.namegame.core;
 
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.willowtreeapps.namegame.network.api.ProfilesRepository;
 import com.willowtreeapps.namegame.network.api.model.Person;
@@ -154,9 +155,12 @@ public class GameLogic implements ProfilesRepository.Listener {
     // Implement Listener interface
     @Override
     public void onLoadSuccess(@NonNull List<Person> people) {
+        // The case the game was not already started
+        if (!mReadyToLoadGame) {
+            // Begin the game now...
+            peopleLogic.next();
+        }
         mReadyToLoadGame = true;
-        peopleLogic.next();
-        mFullyRevealItems = false;
 
         for (Listener listener : listeners)
             listener.onGameLogicLoadSuccess(peopleLogic);
@@ -194,12 +198,8 @@ public class GameLogic implements ProfilesRepository.Listener {
 
         @Override
         public void onItemSelected(int index) {
-            if (TextUtils.equals(mThumbs.get(index).getId(), mNames.get(0).getId())) {
-                // Update any additional state
-                correct = mFullyRevealItems = true;
-            } else {
-                correct = false;
-            }
+            correct = TextUtils.equals(mThumbs.get(index).getId(), mNames.get(0).getId());
+            mFullyRevealItems = true;
         }
 
         @Override

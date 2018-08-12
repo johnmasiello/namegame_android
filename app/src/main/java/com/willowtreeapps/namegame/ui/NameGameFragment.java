@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.Group;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -46,6 +45,8 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
     private List<TextView> mNames = new ArrayList<>(6);
     private ProgressBar mProgressBar;
     private int mNumberOfImagesFinishedLoading;
+
+    private static final int ANIMATION_DELAY = 800;
 
     private static final String ARGS_MODE = "Mode";
 
@@ -177,7 +178,7 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
     }
 
 
-    private void revealNames(List<TextView> names, GameLogic.PeopleLogic peopleLogic) {
+    private void revealNames(List<TextView> names, GameLogic.PeopleLogic peopleLogic, boolean withDelay) {
         // Get the people backed by the thumbs
         List<Person> people = peopleLogic.currentThumbs();
         int n = people.size();
@@ -197,6 +198,7 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
             t.setTextColor(i == correctItemIndex ? colorHighlight : colorNormal);
             t.setVisibility(View.VISIBLE);
         }
+        animateNamesIn(withDelay);
     }
 
     private void hideNames(List<TextView> names) {
@@ -223,13 +225,18 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
      * <p>Post: automatically hides the progress bar, via showProgressBar(false)</p>
      */
     private synchronized void onFinishedLoadingImage() {
-        if (++mNumberOfImagesFinishedLoading == gameLogic.getPeopleLogic().numberOfPeople()) {
+        GameLogic.PeopleLogic peopleLogic = gameLogic.getPeopleLogic();
+        if (++mNumberOfImagesFinishedLoading == peopleLogic.numberOfPeople()) {
             container.setVisibility(View.VISIBLE);
             showPrompt(true);
             animateFacesIn();
             showProgressBar(false);
+            if (gameLogic.fullyRevealItems()) {
+                revealNames(mNames, peopleLogic, true);
+            } else {
+                hideNames(mNames);
+            }
         }
-        Log.d("PicassoCallback", "finished loading image "+mNumberOfImagesFinishedLoading);
     }
 
     /**
@@ -246,19 +253,22 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
             // Set the initial state as hidden
             face.setScaleX(0);
             face.setScaleY(0);
-            face.animate().scaleX(1).scaleY(1).setStartDelay(800 + 120 * i).setInterpolator(OVERSHOOT).start();
+            face.animate().scaleX(1).scaleY(1).setStartDelay(ANIMATION_DELAY + 120 * i).setInterpolator(OVERSHOOT).start();
+        }
+    }
+
+    private void animateNamesIn(boolean withDelay) {
+        for (TextView t : mNames) {
+            // Set the initial state as hidden
+            t.setAlpha(0);
+            t.animate().alpha(1).setStartDelay(withDelay ? ANIMATION_DELAY : 0).start();
         }
     }
 
     @Override
     public void onGameLogicLoadSuccess(@NonNull GameLogic.PeopleLogic peopleLogic) {
-        setImages(faces, peopleLogic.currentThumbs());
-        if (gameLogic.fullyRevealItems()) {
-            revealNames(mNames, peopleLogic);
-        } else {
-            hideNames(mNames);
-        }
         updatePrompt(peopleLogic.currentNames().get(0));
+        setImages(faces, peopleLogic.currentThumbs());
     }
 
     @Override
@@ -313,7 +323,7 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
             peopleLogic.onItemSelected(index);
 
             // Update the Ui
-            revealNames(mNames, peopleLogic);
+            revealNames(mNames, peopleLogic, false);
         }
     };
 
