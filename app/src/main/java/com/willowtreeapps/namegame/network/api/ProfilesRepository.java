@@ -50,41 +50,22 @@ public class ProfilesRepository {
             public void onResponse(Call<List<Person>> call, Response<List<Person>> response) {
                 responseOutcome = SUCCESS;
                 profiles = response.body();
-                Log.d("Repository", "Number of listeners = "+listeners.size());
-                for (Listener listener : listeners) {
+                for (Listener listener : listeners)
                     listener.onLoadSuccess(profiles);
-                }
-                Log.d("Repository", "Success fetching profiles");
             }
 
             @Override
             public void onFailure(Call<List<Person>> call, Throwable t) {
                 responseOutcome = FAIL;
 
-                for (Listener listener : listeners) {
+                for (Listener listener : listeners)
                     listener.onError(t);
-                }
-
-                Log.d("Repository", "Failure fetching profiles");
-                Log.d("Repository", "Reason: "+t.getMessage());
-                Log.d("Repository", "The original url was..." + call.request().url().toString());
-
-                /*
-                Failure fetching profiles
-                Reason: java.lang.IllegalStateException: Expected BEGIN_OBJECT but was BEGIN_ARRAY at line 1 column 2 path $
-                The original url was...https://willowtreeapps.com/api/v1.0/profiles
-                 */
-
-                // Using Api as Call<List<Person>> getProfiles();
-                /*
-                 * com.willowtreeapps.namegame D/Repository: Failure fetching profiles
-                 Reason: java.lang.IllegalStateException: Expected a string but was BEGIN_OBJECT at line 1 column 2133 path $[4].socialLinks[0]
-                 The original url was...https://willowtreeapps.com/api/v1.0/profiles
-                 */
-
-                // -> Solution need to update Social Links To match the spec: [{String, String, String}]
             }
         });
+    }
+
+    public void refresh() {
+        load();
     }
 
     public int getResponseOutcome() {
@@ -119,5 +100,4 @@ public class ProfilesRepository {
         void onLoadSuccess(@NonNull List<Person> people);
         void onError(@NonNull Throwable error);
     }
-
 }

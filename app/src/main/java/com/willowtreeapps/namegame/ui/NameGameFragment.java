@@ -47,11 +47,33 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
     private ProgressBar mProgressBar;
     private int mNumberOfImagesFinishedLoading;
 
+    private static final String ARGS_MODE = "Mode";
+
+    /**
+     *
+     * @param mode Mode of play, defined by {@link GameLogic.Mode}
+     */
+    public static NameGameFragment newInstance(int mode) {
+        NameGameFragment frag = new NameGameFragment();
+        Bundle args = new Bundle();
+        args.putInt(ARGS_MODE, mode);
+        frag.setArguments(args);
+        return frag;
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         NameGameApplication.get(getActivity()).component().inject(this);
-        Log.d("fragment", "content fragment created");
+        // Now the injections are ready
+
+        // Determine whether there was already a game in progress. If not, then begin a new game,
+        // so the UX is immediate engagement
+        if (gameLogic.getMode() == GameLogic.Mode.UNDEFINED) {
+            int mode = getArguments() == null ? GameLogic.Mode.STANDARD :
+                    getArguments().getInt(ARGS_MODE, GameLogic.Mode.STANDARD);
+            gameLogic.newGame(mode);
+        }
     }
 
     @Nullable
@@ -100,8 +122,20 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
     }
 
     /**
+     *
+     * @param mode Mode as defined by {@link GameLogic.Mode}
+     */
+    public void setMode(int mode) {
+        // Updated "Presenter" in MVP
+        // This works as liveData, which will emit the changes back to the Ui, the "View" in MVP
+        if (!gameLogic.newGame(mode)) {
+            Toast.makeText(getContext(), "New Game Request Failed", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
      * A method for setting the images from people into the imageviews
-     * <p>Pre: faces.size() == people.size()</p>
+     * <p>Pre: faces.size() >= people.size()</p>
      */
     private void setImages(List<ImageView> faces, List<Person> people) {
         int imageSize = getContext().getResources().getDimensionPixelSize(R.dimen.thumbSize);
@@ -189,12 +223,11 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
      * <p>Post: automatically hides the progress bar, via showProgressBar(false)</p>
      */
     private synchronized void onFinishedLoadingImage() {
-        if (++mNumberOfImagesFinishedLoading == gameLogic.getPeopleLogic().numberOfThumbs()) {
+        if (++mNumberOfImagesFinishedLoading == gameLogic.getPeopleLogic().numberOfPeople()) {
             container.setVisibility(View.VISIBLE);
             showPrompt(true);
             animateFacesIn();
             showProgressBar(false);
-            // TODO show/animate everything in the UI right here
         }
         Log.d("PicassoCallback", "finished loading image "+mNumberOfImagesFinishedLoading);
     }
@@ -280,8 +313,6 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener {
             peopleLogic.onItemSelected(index);
 
             // Update the Ui
-            // We use currentThumbs as 2nd parameter, because it contains all of person objects
-            // backing the thumbs, which is what we want
             revealNames(mNames, peopleLogic);
         }
     };
