@@ -30,7 +30,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-public class NameGameFragment extends Fragment implements GameLogic.Listener {
+public class NameGameFragment extends Fragment implements GameLogic.Listener, NameGameUIActionable {
 
     private static final Interpolator OVERSHOOT = new OvershootInterpolator();
 

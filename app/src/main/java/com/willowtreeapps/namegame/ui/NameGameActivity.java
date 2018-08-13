@@ -78,9 +78,9 @@ public class NameGameActivity extends AppCompatActivity {
         // In the case of a "mode" was clicked on
         item.setChecked(true);
 
-        // We are making some assumptions here: the fragment class, and that it is the only one in container
-        NameGameFragment nameGameFragment = (NameGameFragment) getSupportFragmentManager().findFragmentById(R.id.container);
-        nameGameFragment.setMode(gameMode);
+        Fragment fragment = getSupportFragmentManager().findFragmentByTag(FRAG_TAG);
+        if (fragment != null && fragment instanceof NameGameUIActionable)
+            ((NameGameUIActionable)fragment).setMode(gameMode);
         return true;
     }
 }

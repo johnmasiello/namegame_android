@@ -1,4 +1,4 @@
-package com.willowtreeapps.namegame.core;
+package com.willowtreeapps.namegame.core.gamelogic;
 
 import android.support.annotation.NonNull;
 
@@ -62,7 +62,7 @@ public class ListRandomizer {
 
     public int nextInt(int size) { return random.nextInt(size); }
 
-    interface ListFilter<T> {
+    public interface ListFilter<T> {
         boolean accept(T item);
     }
 }

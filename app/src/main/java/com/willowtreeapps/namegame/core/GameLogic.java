@@ -2,8 +2,8 @@ package com.willowtreeapps.namegame.core;
 
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
-import android.util.Log;
 
+import com.willowtreeapps.namegame.core.gamelogic.ListRandomizer;
 import com.willowtreeapps.namegame.network.api.ProfilesRepository;
 import com.willowtreeapps.namegame.network.api.model.Person;
 
