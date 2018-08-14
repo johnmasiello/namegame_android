@@ -1,20 +1,21 @@
-Design I
+#Developer's Notes
+### Design I
 I used layered architecture to separate responsibilities. The architecture is MVP. For good design, I saw it advantageous to add a game logic layer through dependency injection, which becomes the "presenter" in MVP. The Repo pushes a List<Person> to the game logic layer via a listener interface. The gameLogic layer pushes data resulting from both the repo and game state to the UI layer, via GameLogic.Listener. The UI layer is loosely coupled with the gameLogic layer, which I mean that gameLogic is a dependency to the UI.
 
-Desgin II
+### Design II
 The game logic layer presents using PeopleLogic interface, which is exposed to the UI layer thereby creating high cohesion with separation of concerns. The interface PeopleLogic I wrote as abstract enough to leverage developing multiple game modes. One example is all modes have next() function to progress to the next round. The ListRandomizer is a dependency to the GameLogic only, so it belongs in a package core.gamelogic. With respect to ListRandomizer itself, I saw leveraging by refactoring with a ListFilter. There is now an overloaded filter parameter, so a gameMode instance may specialize by passing a filter such as pick Person items with first name containing "mat", or ignore items derived from test endpoints.
 
-Basics
+### Basics
 Leveraging time and development was important. Thus essential was using the template, using the libraries in it, customize behavior by leveraging features of libraries, which I clarify the libaries: Picasso, OkHttp3, Retrofit2, Dagger2. There is a lot of power by chaining dependencies of 3rd party libraries to provide features we like for the app such as caching, establishing the connection, simplifiy making a simple GET request, rendering, with little code from the client developer. For example I needed only to refactor the load response from the template, being concerned with model only and NOT with the low-level implementations.
 Another was I fine-tuned the behavior I was looking for with Picasso by adding a few details to the builder, and a callback that I implemented to control and synchronize the animation of the people items in the UI. You will notice that the animations do not depend on load order. Significantly I was able to get the desired effect without any interference from Picasso, and in the process moved Picasso into my list of favorite 3rd party libraries. Another advantage of 3rd party libariers is we can choose the ones that outperform others and rely less on native Android, which the latter can easily fall into regressions with progressive and prolific SDK versioning.
 
-State
+### State
 All state is preserved by a singleton pattern from constructor-oriented dependency injection, where in our case, a null state is not allowed by used of @Nonnull, mainly because our dependencies are few. All live data is pushed forward to the higher level components (dependency inversion), the view; you will note from earlier and see in my code the NameGameFragment is injected with GameLogic, as the game logic layer, and no longer depends DIRECTLY on the Repository. Caching: bitmaps are loaded on request and then cached, since network and storage are contingent on external factors. The initial response from NameGamesApi is saved in our model.
 
-Ideas and features
+### Ideas and features
 Animations. Synchronized the load of people, augmenting with the animation in the template, which stands the test of time. Progress bar improves the UX so the app does not look frozen during a request. A refresh button -many apps have this feature. I implemented suggest modes such as "Mat" Mode. "No Ghost," an improvement, is a variant that is a "nicer" experience than standard, since it ignores headless profiles or "ghosts". Ideas I got as far of thinking of, but were out of scope based on time constraints, were a pop-up detail on profile info, ie. first, last name, role, social media, on click at the end of each round.
 
-Guides/Concepts
-Common Sense
-The template, thanks WillowTree
-"Layered Architecture, Dependency Injection, and Dependency Inversion", Boodhoo, Jean-Paul S <https://www.codemag.com/article/0705071/Layered-Architecture-Dependency-Injection-and-Dependency-Inversion>
+### Guides/Concepts
+- Common Sense
+- The template, thanks WillowTree
+- ["Layered Architecture, Dependency Injection, and Dependency Inversion", Boodhoo, Jean-Paul S](https://www.codemag.com/article/0705071/Layered-Architecture-Dependency-Injection-and-Dependency-Inversion)
