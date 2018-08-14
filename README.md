@@ -1,4 +1,4 @@
-#Developer's Notes
+# Developer's Notes
 ### Design I
 I used layered architecture to separate responsibilities. The architecture is MVP. For good design, I saw it advantageous to add a game logic layer through dependency injection, which becomes the "presenter" in MVP. The Repo pushes a List<Person> to the game logic layer via a listener interface. The gameLogic layer pushes data resulting from both the repo and game state to the UI layer, via GameLogic.Listener. The UI layer is loosely coupled with the gameLogic layer, which I mean that gameLogic is a dependency to the UI.
 
