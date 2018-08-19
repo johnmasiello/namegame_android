@@ -8,8 +8,8 @@ import java.util.List;
 
 public class Profiles implements Parcelable {
 
-    private List<Person> items;
-    private Metadata meta;
+    final private List<Person> items;
+    final private Metadata meta;
 
     public Profiles(List<Person> items, Metadata meta) {
         this.items = items;

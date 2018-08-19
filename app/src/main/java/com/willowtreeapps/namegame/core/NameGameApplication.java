@@ -24,7 +24,7 @@ public class NameGameApplication extends Application {
         return component;
     }
 
-    protected ApplicationComponent buildComponent() {
+    private ApplicationComponent buildComponent() {
         // The modules are annotated with @Module So that dagger2 knows to include them
         return DaggerApplicationComponent.builder()
                 .applicationModule(new ApplicationModule(this))

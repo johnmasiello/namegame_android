@@ -1,5 +1,6 @@
 package com.willowtreeapps.namegame.ui;
 
+import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -41,8 +42,8 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener, Na
 
     private TextView prompt;
     private Group container;
-    private List<ImageView> faces = new ArrayList<>(6);
-    private List<TextView> mNames = new ArrayList<>(6);
+    final private List<ImageView> faces = new ArrayList<>(6);
+    final private List<TextView> mNames = new ArrayList<>(6);
     private ProgressBar mProgressBar;
     private int mNumberOfImagesFinishedLoading;
 
@@ -65,26 +66,29 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener, Na
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //noinspection ConstantConditions
         NameGameApplication.get(getActivity()).component().inject(this);
         // Now the injections are ready
 
         // Determine whether there was already a game in progress. If not, then begin a new game,
         // so the UX is immediate engagement
         if (gameLogic.getMode() == GameLogic.Mode.UNDEFINED) {
-            int mode = getArguments() == null ? GameLogic.Mode.STANDARD :
-                    getArguments().getInt(ARGS_MODE, GameLogic.Mode.STANDARD);
+            int mode = getArguments() == null ?
+                    GameLogic.Mode.STANDARD :
+                    getArguments()
+                            .getInt(ARGS_MODE, GameLogic.Mode.STANDARD);
             gameLogic.newGame(mode);
         }
     }
 
     @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.name_game_fragment, container, false);
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         prompt = view.findViewById(R.id.prompt);
         mProgressBar = view.findViewById(R.id.myProgressBar);
         container = view.findViewById(R.id.face_container);
@@ -137,9 +141,14 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener, Na
     /**
      * A method for setting the images from people into the imageviews
      * <p>Pre: faces.size() >= people.size()</p>
+     * @param faces The list of image views to draw the headshot images
+     * @param people The list of people for which we want to draw headshots
      */
     private void setImages(List<ImageView> faces, List<Person> people) {
-        int imageSize = getContext().getResources().getDimensionPixelSize(R.dimen.thumbSize);
+        Context context = getContext();
+        if (context == null)
+            return;
+        int imageSize = context.getResources().getDimensionPixelSize(R.dimen.thumbSize);
         int n = people.size();
         String url;
 
@@ -173,6 +182,11 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener, Na
             faces.get(i).setImageResource(R.drawable.ic_face_white_48dp);
     }
 
+    /**
+     *
+     * @param namedPerson The person whose name we want to prompt in the game. We use both first
+     *                    and last name
+     */
     private void updatePrompt(Person namedPerson) {
         prompt.setText(String.format(getString(R.string.question),
                 namedPerson.getFirstName(),
@@ -180,7 +194,14 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener, Na
         ));
     }
 
-
+    /**
+     *
+     * @param names The list of TextViews with name the people associated with the view
+     * @param peopleLogic The logic that accesses the game state. Useful in particular
+     *                    for gathering the people items
+     * @param withDelay true -> animate textview display with delay; false -> the same, but
+     *                  with no delay
+     */
     private void revealNames(List<TextView> names, GameLogic.PeopleLogic peopleLogic, boolean withDelay) {
         // Get the people backed by the thumbs
         List<Person> people = peopleLogic.currentThumbs();
@@ -189,6 +210,9 @@ public class NameGameFragment extends Fragment implements GameLogic.Listener, Na
         // We make the Ui, pretty
         // by making the correct answer stand out
         TextView t;
+        Context context = getContext();
+        if (context == null)
+            return;
         Resources res = getContext().getResources();
         int colorNormal = res.getColor(R.color.darkGray);
         int colorHighlight = res.getColor(peopleLogic.isCorrect() ? R.color.alphaGreen :

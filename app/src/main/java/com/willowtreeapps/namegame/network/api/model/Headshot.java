@@ -5,13 +5,13 @@ import android.os.Parcelable;
 
 public class Headshot implements Parcelable {
 
-    private String type;
-    private String mimeType;
-    private String id;
-    private String url;
-    private String alt;
-    private int height;
-    private int width;
+    final private String type;
+    final private String mimeType;
+    final private String id;
+    final private String url;
+    final private String alt;
+    final private int height;
+    final private int width;
 
     public Headshot(String type,
                     String mimeType,

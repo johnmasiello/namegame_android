@@ -1,13 +1,10 @@
 package com.willowtreeapps.namegame.network.api.model;
 
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.util.Config;
 import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Person implements Parcelable {

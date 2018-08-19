@@ -35,8 +35,11 @@ public final class Ui {
 
     // Useful for when a library does not automatically resolve relative paths
     public static String urlPathWithScheme(String path) {
-        return path == null ? null :
-                "http:" + path;
+        return path == null ?
+                    null :
+                path.startsWith("//") ?
+                        "http:" + path :
+                    path;
     }
 
     private Ui() {

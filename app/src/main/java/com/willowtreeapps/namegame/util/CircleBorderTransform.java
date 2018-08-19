@@ -31,7 +31,9 @@ public class CircleBorderTransform implements Transformation {
             source.recycle();
         }
 
-        Bitmap bitmap = Bitmap.createBitmap(size, size, source.getConfig());
+        // Update this statement to use the config from the squaredBitmap,
+        // As Picasso warns about undefined behavior for source.getConfig(), since it is recycled
+        Bitmap bitmap = Bitmap.createBitmap(size, size, squaredBitmap.getConfig());
 
         Canvas canvas = new Canvas(bitmap);
         Paint paint = new Paint();

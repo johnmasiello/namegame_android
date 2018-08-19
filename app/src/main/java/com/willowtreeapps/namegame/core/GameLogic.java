@@ -25,21 +25,25 @@ public class GameLogic implements ProfilesRepository.Listener {
     private boolean mFullyRevealItems;
     private int mMode;
     private PeopleLogic peopleLogic;
-    private ArrayList<Listener> listeners = new ArrayList<>(1);
+    private final ArrayList<Listener> listeners = new ArrayList<>(1);
 
     private final static String ERROR_MESSAGE_PROFILES =
             "Unable to begin game; data is stale or inaccessible";
 
+    /**
+     * Class that describes the variant, or mode of play: UNDEFINED, STANDARD, NO_GHOST, MAT, CHEAT,
+     * REVERSE
+     */
     public static final class Mode {
         public static final int UNDEFINED   = -1; // Used to signify there is no current game in progress
         public static final int STANDARD    = 0;
         public static final int NO_GHOST    = 1;
         public static final int MAT         = 2;
         public static final int CHEAT       = 3;
-        public static final int REVERSE     = 4;
+        static final int REVERSE     = 4;
     }
 
-    public GameLogic(@NonNull ListRandomizer listRandomizer,
+    GameLogic(@NonNull ListRandomizer listRandomizer,
                      ProfilesRepository profilesRepository) {
         this.mListRandomizer = listRandomizer;
         this.mProfilesRepository = profilesRepository;
@@ -49,7 +53,7 @@ public class GameLogic implements ProfilesRepository.Listener {
     }
 
     /**
-     *
+     * @param mode Mode of play, defined by {@link GameLogic.Mode}
      * @return whether the game was successfully initialized to a new game. If the data is not yet
      * live, then the game state must defer its reset
      */
@@ -77,13 +81,23 @@ public class GameLogic implements ProfilesRepository.Listener {
         }
     }
 
+    /**
+     *
+     * @return Mode of play, defined by {@link GameLogic.Mode}
+     */
     public int getMode() {
         return mMode;
     }
 
     // Keep the implementation simple to avoid side-effects
-    protected final void setMode(int mode) {
-        switch (mMode = mode) {
+
+    /**
+     *
+     * @param mode Mode of play, defined by {@link GameLogic.Mode}
+     */
+    private void setMode(int mode) {
+        mMode = mode;
+        switch (mode) {
             case Mode.STANDARD:
                 peopleLogic = new StandardModePeopleLogic();
                 break;
@@ -108,7 +122,8 @@ public class GameLogic implements ProfilesRepository.Listener {
 
     /**
      * <p>Pre: {@link #networkLoadSuccess()} == true</p>
-     * @return
+     * <p>Post: Do not hold on to a reference to people logic</p>
+     * @return An implementation of peopleLogic, which can be used to update the state of the game
      */
     public PeopleLogic getPeopleLogic() {
         return peopleLogic;
@@ -176,20 +191,22 @@ public class GameLogic implements ProfilesRepository.Listener {
     }
 
     private class StandardModePeopleLogic implements PeopleLogic {
-        protected final int NUMBER_OF_THUMBS  = 6;
-        protected final int NUMBER_OF_NAMES   = 1;
+        final int NUMBER_OF_THUMBS  = 6;
+        final int NUMBER_OF_NAMES   = 1;
 
-        protected List<Person> mThumbs;
-        protected List<Person> mNames = new ArrayList<>(NUMBER_OF_NAMES);
-        protected int mNumberOfPeople;
-        protected int correctIndex;
-        protected boolean correct;
+        List<Person> mThumbs;
+        final List<Person> mNames = new ArrayList<>(NUMBER_OF_NAMES);
+        int mNumberOfPeople;
+        int correctIndex;
+        boolean correct;
         {
             mNames.add(null);
         }
 
         @Override
         public void next() {
+            if (mProfilesRepository.getProfiles() == null)
+                return;
             mThumbs = mListRandomizer.pickN(mProfilesRepository.getProfiles(), NUMBER_OF_THUMBS);
             mNumberOfPeople = mThumbs.size();
             mNames.set(0, mThumbs.get(correctIndex = mListRandomizer.nextInt(mNumberOfPeople)));
@@ -239,11 +256,14 @@ public class GameLogic implements ProfilesRepository.Listener {
 
         @Override
         public void next() {
+            if (mProfilesRepository.getProfiles() == null)
+                return;
             mThumbs = mListRandomizer.pickN(mProfilesRepository.getProfiles(),
                     NUMBER_OF_THUMBS,
                     noGhost);
             mNumberOfPeople = mThumbs.size();
-            mNames.set(0, mThumbs.get(correctIndex = mListRandomizer.nextInt(mNumberOfPeople)));
+            correctIndex = mListRandomizer.nextInt(mNumberOfPeople);
+            mNames.set(0, mThumbs.get(correctIndex));
             mFullyRevealItems = false;
         }
     }
@@ -258,11 +278,14 @@ public class GameLogic implements ProfilesRepository.Listener {
 
         @Override
         public void next() {
+            if (mProfilesRepository.getProfiles() == null)
+                return;
             mThumbs = mListRandomizer.pickN(mProfilesRepository.getProfiles(),
                     NUMBER_OF_THUMBS,
                     mat);
             mNumberOfPeople = mThumbs.size();
-            mNames.set(0, mThumbs.get(correctIndex = mListRandomizer.nextInt(mNumberOfPeople)));
+            correctIndex = mListRandomizer.nextInt(mNumberOfPeople);
+            mNames.set(0, mThumbs.get(correctIndex));
             mFullyRevealItems = false;
         }
     }
@@ -276,19 +299,20 @@ public class GameLogic implements ProfilesRepository.Listener {
         public void next() {
             super.next();
             // The answer is always the top-left corner
-            mNames.set(0, mThumbs.get(correctIndex = 0));
+            correctIndex = 0;
+            mNames.set(0, mThumbs.get(correctIndex));
         }
     }
 
     private class ReverseModePeopleLogic implements PeopleLogic {
-        protected final int NUMBER_OF_THUMBS  = 1;
-        protected final int NUMBER_OF_NAMES   = 5;
+        final int NUMBER_OF_THUMBS  = 1;
+        final int NUMBER_OF_NAMES   = 5;
 
-        protected List<Person> mThumbs = new ArrayList<>(NUMBER_OF_THUMBS);
-        protected List<Person> mNames;
-        protected int mNumberOfPeople;
-        protected int correctIndex;
-        protected boolean correct;
+        final List<Person> mThumbs = new ArrayList<>(NUMBER_OF_THUMBS);
+        List<Person> mNames;
+        int mNumberOfPeople;
+        int correctIndex;
+        boolean correct;
 
         {
             mThumbs.add(null);
@@ -296,9 +320,12 @@ public class GameLogic implements ProfilesRepository.Listener {
 
         @Override
         public void next() {
+            if (mProfilesRepository.getProfiles() == null)
+                return;
             mNames = mListRandomizer.pickN(mProfilesRepository.getProfiles(), NUMBER_OF_NAMES);
             mNumberOfPeople = mNames.size();
-            mThumbs.set(0, mThumbs.get(correctIndex = mListRandomizer.nextInt(mNumberOfPeople)));
+            correctIndex = mListRandomizer.nextInt(mNumberOfPeople);
+            mThumbs.set(0, mThumbs.get(correctIndex));
         }
 
         @Override

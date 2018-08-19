@@ -3,9 +3,9 @@ package com.willowtreeapps.namegame.util;
 import java.io.File;
 import java.util.Collection;
 
-public final class Preconditions {
+final class Preconditions {
 
-    public static <T> T checkNotNull(T reference, String message) {
+    private static <T> T checkNotNull(T reference, String message) {
         if (reference == null) {
             throw new IllegalArgumentException(message);
         }

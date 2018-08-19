@@ -2,7 +2,6 @@ package com.willowtreeapps.namegame.ui;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.ListFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -79,7 +78,8 @@ public class NameGameActivity extends AppCompatActivity {
         item.setChecked(true);
 
         Fragment fragment = getSupportFragmentManager().findFragmentByTag(FRAG_TAG);
-        if (fragment != null && fragment instanceof NameGameUIActionable)
+        if (fragment != null &&
+                fragment instanceof NameGameUIActionable)
             ((NameGameUIActionable)fragment).setMode(gameMode);
         return true;
     }

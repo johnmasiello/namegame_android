@@ -28,7 +28,8 @@ public class ListRandomizer {
     }
 
     @NonNull
-    public <T> List<T> pickN(@NonNull List<T> list, int n) { return pickN(list, n, NO_FILTER); }
+    public <T> List<T> pickN(@NonNull List<T> list, int n) { //noinspection unchecked
+        return pickN(list, n, NO_FILTER); }
 
     @NonNull
     public <T> List<T> pickN(@NonNull List<T> list, int n, ListFilter<T> filter) {
@@ -40,21 +41,22 @@ public class ListRandomizer {
         for (int i = 0; i < n; i++) {
             index = random.nextInt(pickFrom.size());
 
-            SELECT_ITEM:
-            while (true) {
-                for (int j = index; j > -1; j--) {
-                    if (filter.accept(pickFrom.get(j))) {
-                        picks.add(pickFrom.remove(j));
-                        break SELECT_ITEM;
-                    }
+            // Iterate
+            for (int j = index; j > -1; j--) {
+                if (filter.accept(pickFrom.get(j))) {
+                    picks.add(pickFrom.remove(j));
+
+                    // item already found
+                    // Move index to the end to prevent the next loop
+                    index = pickFrom.size();
+                    break;
                 }
-                for (int j = index + 1; j < pickFrom.size(); j++) {
-                    if (filter.accept(pickFrom.get(j))) {
-                        picks.add(pickFrom.remove(j));
-                        break SELECT_ITEM;
-                    }
+            }
+            for (int j = index + 1; j < pickFrom.size(); j++) {
+                if (filter.accept(pickFrom.get(j))) {
+                    picks.add(pickFrom.remove(j));
+                    break;
                 }
-                break;
             }
         }
         return picks;
