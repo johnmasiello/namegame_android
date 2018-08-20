@@ -5,42 +5,42 @@ import android.os.Parcelable;
 
 // Simple POJO to help satisfy the spec for the response body
 public class SocialLinks implements Parcelable {
-    private final String mType;
-    private final String mCallToAction;
-    private final String mUrl;
+    private final String type;
+    private final String callToAction;
+    private final String url;
 
     public SocialLinks(String type,
                        String callToAction,
                        String url) {
-        this.mType = type;
-        this.mCallToAction = callToAction;
-        this.mUrl = url;
+        this.type = type;
+        this.callToAction = callToAction;
+        this.url = url;
     }
 
     private SocialLinks(Parcel in) {
-        this.mType = in.readString();
-        this.mCallToAction = in.readString();
-        this.mUrl = in.readString();
+        this.type = in.readString();
+        this.callToAction = in.readString();
+        this.url = in.readString();
     }
 
     public String getType() {
-        return mType;
+        return type;
     }
 
     public String getCallToAction() {
-        return mCallToAction;
+        return callToAction;
     }
 
     public String getUrl() {
-        return mUrl;
+        return url;
     }
 
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.mType);
-        dest.writeString(this.mCallToAction);
-        dest.writeString(this.mUrl);
+        dest.writeString(this.type);
+        dest.writeString(this.callToAction);
+        dest.writeString(this.url);
     }
 
     public static final Creator<SocialLinks> CREATOR = new Creator<SocialLinks>() {

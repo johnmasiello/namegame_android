@@ -41,7 +41,11 @@ public class PersonTest {
                 "        \"width\": 340\n" +
                 "      },\n" +
                 "      \"socialLinks\": [\n" +
-                "        \n" +
+                "        {\n" +
+                "           \"type\": \"linkedin\",\n" +
+                "           \"callToAction\": \"Follow\",\n" +
+                "           \"url\": \"https://www.linkedin.com/in/joel_garrett\"" +
+                "        }\n" +
                 "      ]\n" +
                 "    }";
     }
@@ -59,6 +63,18 @@ public class PersonTest {
                 "//images.contentful.com/3cttzl4i3k1h/4Mv2CONANym46UwuuCIgK/cbeb43c93a843a43c07b1de9954795e2/headshot_joel_garrett.jpg",
                 person.getHeadshot().getUrl());
 
+        Assert.assertTrue("There should be at least one social link",
+                person.getSocialLinks().size() > 0);
+
+        // Test type of first SocialLinks instance
+        Assert.assertEquals("Social Link type should match",
+                "linkedin",
+                person.getSocialLinks().get(0).getType());
+
+        // Test url of first SocialLinks instance
+        Assert.assertEquals("Social Link url should match",
+                "https://www.linkedin.com/in/joel_garrett",
+                person.getSocialLinks().get(0).getUrl());
     }
 
     @Test
@@ -83,5 +99,13 @@ public class PersonTest {
         Assert.assertEquals("Headshot url should match",
                 "//images.contentful.com/3cttzl4i3k1h/4Mv2CONANym46UwuuCIgK/cbeb43c93a843a43c07b1de9954795e2/headshot_joel_garrett.jpg",
                 person.getHeadshot().getUrl());
+
+        Assert.assertTrue("There should be at least one social link",
+                person.getSocialLinks().size() > 0);
+
+        // Test social links call to action
+        Assert.assertEquals("Social Links call to action should match",
+                "Follow",
+                person.getSocialLinks().get(0).getCallToAction());
     }
 }
