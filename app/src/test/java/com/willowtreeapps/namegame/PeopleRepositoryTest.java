@@ -23,7 +23,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @SmallTest
-public class ProfilesRepositoryTest {
+public class PeopleRepositoryTest {
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
@@ -78,7 +78,12 @@ public class ProfilesRepositoryTest {
         ProfilesRepository repo = new ProfilesRepository(api);
         ProfilesRepository.Listener listener = mock(ProfilesRepository.Listener.class);
         repo.register(listener);
+
+        // Verify the listener was not called for success
         verify(listener, times(0)).onLoadSuccess(ArgumentMatchers.<Person>anyList());
+
+        // Verify the listener was called for error
+        verify(listener, times(1)).onError(any(Throwable.class));
     }
 
     @Test
@@ -89,5 +94,4 @@ public class ProfilesRepositoryTest {
         ProfilesRepository repo = new ProfilesRepository(api, listener);
         verify(listener, times(1)).onError(any(IOException.class));
     }
-
 }

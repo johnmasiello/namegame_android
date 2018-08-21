@@ -9,6 +9,10 @@ import okhttp3.ResponseBody;
 import retrofit2.Callback;
 import retrofit2.Response;
 
+/**
+ * Mocks the Call of NameGameApi
+ * @param <T> The body returned by a successful response
+ */
 public abstract class SynchronousCallAdapter<T> extends CallAdapter<T> {
 
     protected abstract Response<T> response();
