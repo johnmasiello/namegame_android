@@ -33,7 +33,6 @@ public class ListRandomizer {
 
     @NonNull
     public <T> List<T> pickN(@NonNull List<T> list, int n, ListFilter<T> filter) {
-        if (list.size() == n) return list;
         if (n == 0) return Collections.emptyList();
         List<T> pickFrom = new ArrayList<>(list);
         List<T> picks = new ArrayList<>(n);
